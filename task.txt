@@ -2,4 +2,51 @@
 2)Выбрать все фильмы которые вышли с  n - n года
 3)Посчитать кол-во фильмов снятые конкретной компанией
 4)Вывести всех актёров и массив ролей*
+
 5)Срдений бюджет фильмов по годам (год - срюБюджет фильма)
+
+
+--1)выбрать фильмы с наименьшим количеством просмотров от пользователей
+SELECT 
+    m.title,
+    COUNT(mw.movie_id) as watch_count
+FROM Movie m
+LEFT JOIN movie_watched mw ON m.movie_id = mw.movie_id
+GROUP BY m.movie_id, m.title
+ORDER BY watch_count ASC
+LIMIT 5;
+
+--Выбрать все фильмы которые вышли с  n - n года
+SELECT 
+    title,
+    release_year
+FROM Movie
+WHERE release_year BETWEEN '1990-01-01' AND '2010-12-31'
+ORDER BY release_year;
+
+--Посчитать кол-во фильмов снятые конкретной компанией
+SELECT 
+    c.name as company_name,
+    COUNT(DISTINCT mc.movie_id) as movie_count
+FROM Company c
+LEFT JOIN movie_company mc ON c.company_id = mc.company_id
+GROUP BY c.company_id, c.name
+ORDER BY movie_count DESC;
+--4)Вывести всех актёров и массив ролей*
+SELECT 
+    CONCAT(p.firstname, ' ', p.lastname) as actor_name,
+    STRING_AGG(DISTINCT mpr.character_name, ', ') as roles_played
+FROM Person p
+JOIN Person_Role pr ON p.person_id = pr.person_id AND pr.name_role = 'Актёр'
+LEFT JOIN Movie_Person_Role mpr ON p.person_id = mpr.person_id
+GROUP BY p.person_id, p.firstname, p.lastname
+ORDER BY actor_name;
+
+--5)Средний бюджет фильмов по годам (год - срюБюджет фильма)
+SELECT 
+    EXTRACT(YEAR FROM release_year) as year,
+    ROUND(AVG(budget) / 1000000, 2) as avg_budget_millions
+FROM Movie
+WHERE budget IS NOT NULL
+GROUP BY EXTRACT(YEAR FROM release_year)
+ORDER BY year;
